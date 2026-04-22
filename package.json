@@ -1,0 +1,1 @@
+{\n  "private": true,\n  "name": "Neural-Breach-Tower-Defense",\n  "workspaces": {\n    "frontend": "./frontend",\n    "backend": "./backend",\n    "shared": "./shared"\n  }\n}
