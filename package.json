@@ -1,5 +1,5 @@
 {
-   "\n":"private",:true,
+   "\n":"private": true,
    "\n""name":"Neural-Breach-Tower-Defense",
    "\n""workspaces":{
       "\n""frontend":"./frontend",
