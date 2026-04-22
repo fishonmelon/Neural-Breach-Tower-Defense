@@ -1,3 +1,4 @@
+{
    "\n""private":true,
    "\n""name":"Neural-Breach-Tower-Defense",
    "\n""workspaces":{
@@ -5,3 +6,4 @@
       "\n""backend":"./backend",
       "\n""shared":"./shared""\n"
    }"\n"
+}
