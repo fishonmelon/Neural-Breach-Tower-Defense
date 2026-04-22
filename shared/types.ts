@@ -10,9 +10,9 @@ export interface GameConfig {
 
 export const DIFFICULTY_CONFIG: Record<Difficulty, { waves: number; multiplier: number }> = {
   bronze: { waves: 35, multiplier: 1 },
-  cobalt: { waves: 45, multiplier: 1.3 },
-  obsidian: { waves: 50, multiplier: 1.8 },
-  singularity: { waves: 175, multiplier: 2.5 },
+  cobalt: { waves: 45, multiplier: 1 },
+  obsidian: { waves: 50, multiplier: 1 },
+  singularity: { waves: 175, multiplier: 1 },
   sandbox: { waves: 999, multiplier: 1 },
 };
 
