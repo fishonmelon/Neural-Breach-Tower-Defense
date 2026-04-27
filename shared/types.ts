@@ -46,6 +46,16 @@ export interface Enemy {
   pathProgress: number;
 }
 
+export interface Projectile {
+  id: string;
+  towerId: string;
+  enemyId: string;
+  x: number;
+  y: number;
+  speed: number;
+  damage: number;
+}
+
 export interface GameState {
   id: string;
   mode: GameMode;
