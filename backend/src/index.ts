@@ -2,8 +2,10 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
-import { GameMode, Difficulty, GameState } from '../../shared/types';
+import { GameMode, Difficulty, GameState, Tower } from '../../shared/types';
 import { createGameState, createPlayer } from '../../shared/gameUtils';
+import { GameEngine } from './gameEngine';
+import { ServerGameLoop } from './gameLoop';
 
 const app = express();
 const httpServer = createServer(app);
@@ -16,91 +18,149 @@ const io = new Server(httpServer, {
 
 app.use(express.json());
 
-// Store active games
-const games = new Map<string, GameState>();
-
-// Health check endpoint
-app.get('/health', (req, res) => {
+// Health check
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Socket.io events
+// One entry per active game room
+interface GameRoom {
+  engine: GameEngine;
+  loop: ServerGameLoop;
+  state: GameState;
+}
+
+const rooms = new Map<string, GameRoom>();
+
 io.on('connection', (socket) => {
   console.log(`Player connected: ${socket.id}`);
 
-  // Create a new game
-  socket.on('create_game', (data: { username: string; gameMode: GameMode; difficulty: Difficulty }, callback) => {
-    try {
-      const gameId = uuidv4();
-      const player = createPlayer(socket.id, data.username);
-      const gameState = createGameState(gameId, data.gameMode, data.difficulty, [player]);
+  // --- Create game ---
+  socket.on(
+    'create_game',
+    (
+      data: { username: string; gameMode: GameMode; difficulty: Difficulty },
+      callback: (res: { success: boolean; gameId?: string; error?: string }) => void
+    ) => {
+      try {
+        const gameId = uuidv4();
+        const player = createPlayer(socket.id, data.username);
+        const state = createGameState(gameId, data.gameMode, data.difficulty, [player]);
+        const engine = new GameEngine(state);
 
-      games.set(gameId, gameState);
-      socket.join(gameId);
-      socket.emit('game_created', { gameId, gameState });
-      
-      console.log(`Game created: ${gameId} by ${data.username} (${data.gameMode}/${data.difficulty})`);
-      callback({ success: true, gameId });
-    } catch (error) {
-      console.error('Error creating game:', error);
-      callback({ success: false, error: 'Failed to create game' });
-    }
-  });
+        const loop = new ServerGameLoop(engine, (updatedState) => {
+          io.to(gameId).emit('game_state_update', updatedState);
+        });
 
-  // Join an existing game
-  socket.on('join_game', (data: { gameId: string; username: string }, callback) => {
-    try {
-      const gameState = games.get(data.gameId);
-      if (!gameState) {
-        return callback({ success: false, error: 'Game not found' });
+        rooms.set(gameId, { engine, loop, state });
+        socket.join(gameId);
+        socket.emit('game_created', { gameId, state });
+
+        console.log(`Game created: ${gameId} by ${data.username}`);
+        callback({ success: true, gameId });
+      } catch (err) {
+        console.error('Error creating game:', err);
+        callback({ success: false, error: 'Failed to create game' });
       }
-
-      const player = createPlayer(socket.id, data.username);
-      gameState.players.push(player);
-      socket.join(data.gameId);
-      io.to(data.gameId).emit('player_joined', { player, totalPlayers: gameState.players.length });
-
-      console.log(`Player ${data.username} joined game ${data.gameId}`);
-      callback({ success: true, gameState });
-    } catch (error) {
-      console.error('Error joining game:', error);
-      callback({ success: false, error: 'Failed to join game' });
     }
-  });
+  );
 
-  // Start game
-  socket.on('start_game', (data: { gameId: string }, callback) => {
-    try {
-      const gameState = games.get(data.gameId);
-      if (!gameState) {
-        return callback({ success: false, error: 'Game not found' });
+  // --- Join game ---
+  socket.on(
+    'join_game',
+    (
+      data: { gameId: string; username: string },
+      callback: (res: { success: boolean; state?: GameState; error?: string }) => void
+    ) => {
+      try {
+        const room = rooms.get(data.gameId);
+        if (!room) return callback({ success: false, error: 'Game not found' });
+
+        const player = createPlayer(socket.id, data.username);
+        room.state.players.push(player);
+        socket.join(data.gameId);
+        io.to(data.gameId).emit('player_joined', {
+          player,
+          totalPlayers: room.state.players.length,
+        });
+
+        console.log(`${data.username} joined game ${data.gameId}`);
+        callback({ success: true, state: room.state });
+      } catch (err) {
+        console.error('Error joining game:', err);
+        callback({ success: false, error: 'Failed to join game' });
       }
-
-      gameState.currentWave = 1;
-      io.to(data.gameId).emit('game_started', { gameState });
-      console.log(`Game ${data.gameId} started`);
-      callback({ success: true });
-    } catch (error) {
-      console.error('Error starting game:', error);
-      callback({ success: false, error: 'Failed to start game' });
     }
+  );
+
+  // --- Start game (kicks off the server loop) ---
+  socket.on(
+    'start_game',
+    (
+      data: { gameId: string },
+      callback: (res: { success: boolean; error?: string }) => void
+    ) => {
+      try {
+        const room = rooms.get(data.gameId);
+        if (!room) return callback({ success: false, error: 'Game not found' });
+
+        room.engine.startWave();
+        room.loop.start();
+
+        io.to(data.gameId).emit('game_started', { state: room.state });
+        console.log(`Game ${data.gameId} started`);
+        callback({ success: true });
+      } catch (err) {
+        console.error('Error starting game:', err);
+        callback({ success: false, error: 'Failed to start game' });
+      }
+    }
+  );
+
+  // --- Player places a tower ---
+  socket.on('place_tower', (data: { gameId: string; tower: Tower }) => {
+    const room = rooms.get(data.gameId);
+    if (!room) return;
+    room.engine.addTower(data.tower);
   });
 
-  // Player disconnection
+  // --- Player removes a tower ---
+  socket.on('remove_tower', (data: { gameId: string; towerId: string }) => {
+    const room = rooms.get(data.gameId);
+    if (!room) return;
+    room.engine.removeTower(data.towerId);
+  });
+
+  // --- Pause / resume ---
+  socket.on('pause_game', (data: { gameId: string }) => {
+    const room = rooms.get(data.gameId);
+    if (!room) return;
+    room.state.isPaused = true;
+    io.to(data.gameId).emit('game_paused');
+  });
+
+  socket.on('resume_game', (data: { gameId: string }) => {
+    const room = rooms.get(data.gameId);
+    if (!room) return;
+    room.state.isPaused = false;
+    io.to(data.gameId).emit('game_resumed');
+  });
+
+  // --- Disconnect cleanup ---
   socket.on('disconnect', () => {
     console.log(`Player disconnected: ${socket.id}`);
-    
-    // Clean up player from all games
-    games.forEach((gameState, gameId) => {
-      const playerIndex = gameState.players.findIndex(p => p.id === socket.id);
-      if (playerIndex !== -1) {
-        gameState.players.splice(playerIndex, 1);
-        io.to(gameId).emit('player_left', { playerId: socket.id });
-        
-        // Clean up empty games
-        if (gameState.players.length === 0) {
-          games.delete(gameId);
-        }
+
+    rooms.forEach((room, gameId) => {
+      const idx = room.state.players.findIndex((p) => p.id === socket.id);
+      if (idx === -1) return;
+
+      room.state.players.splice(idx, 1);
+      io.to(gameId).emit('player_left', { playerId: socket.id });
+
+      if (room.state.players.length === 0) {
+        room.loop.stop();
+        rooms.delete(gameId);
+        console.log(`Game ${gameId} cleaned up (empty)`);
       }
     });
   });
@@ -108,5 +168,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
-  console.log(`🎮 Neural Breach Tower Defense server running on port ${PORT}`);
+  console.log(`🎮 Neural Breach TD server running on port ${PORT}`);
 });
