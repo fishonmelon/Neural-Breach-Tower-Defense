@@ -1,8 +1,14 @@
+import path from 'path';
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
   plugins: [svelte()],
+  resolve: {
+    alias: {
+      $shared: path.resolve('../shared'),
+    },
+  },
   server: {
     port: 5173,
     proxy: {
@@ -13,15 +19,3 @@ export default defineConfig({
     },
   },
 });
-import path from 'path';
-
-export default defineConfig({
-  plugins: [svelte()],
-  resolve: {
-    alias: {
-      '$shared': path.resolve('../shared'),
-    },
-  },
-  // ...
-});
-import { DIFFICULTY_CONFIG } from '$shared/types';
