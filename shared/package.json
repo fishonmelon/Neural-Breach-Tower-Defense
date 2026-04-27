@@ -1,0 +1,12 @@
+{
+  "name": "neural-breach-td-shared",
+  "version": "1.0.0",
+  "description": "Shared types, constants, and utilities",
+  "type": "module",
+  "main": "./types.ts",
+  "exports": {
+    "./types": "./types.ts",
+    "./constants": "./constants.ts",
+    "./gameUtils": "./gameUtils.ts"
+  }
+}
