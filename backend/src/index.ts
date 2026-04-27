@@ -2,8 +2,8 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
-import { GameMode, Difficulty, GameState } from '../shared/types';
-import { createGameState, createPlayer } from '../shared/gameUtils';
+import { GameMode, Difficulty, GameState } from '../../shared/types';
+import { createGameState, createPlayer } from '../../shared/gameUtils';
 
 const app = express();
 const httpServer = createServer(app);
