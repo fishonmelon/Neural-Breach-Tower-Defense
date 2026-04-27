@@ -16,6 +16,7 @@ export function createGameState(
     difficulty,
     waveCount: WAVE_COUNTS[difficulty],
     currentWave: 0,
+    isWaveActive: false,
     isPaused: false,
     isGameOver: false,
     playerHealth: INITIAL_HEALTH,
@@ -24,6 +25,7 @@ export function createGameState(
     towers: [],
     enemies: [],
     projectiles: [],
+    gameTime: 0,
     timestamp: Date.now(),
   };
 }
@@ -37,6 +39,7 @@ export function createPlayer(id: string, username: string): Player {
     username,
     gold: INITIAL_GOLD,
     health: INITIAL_HEALTH,
+    lives: 3,
     score: 0,
     isAlive: true,
   };
@@ -61,10 +64,10 @@ export function isGameOver(state: GameState): boolean {
  */
 export function isWaveComplete(state: GameState): boolean {
   const waveCount = state.waveCount;
-  
+
   // Sandbox mode never ends
   if (waveCount === null) return false;
-  
+
   // Check if current wave exceeds total wave count
   return state.currentWave > waveCount;
 }
@@ -75,4 +78,5 @@ export function isWaveComplete(state: GameState): boolean {
 export function getWaveProgress(state: GameState): number {
   if (state.waveCount === null) return 0; // Sandbox
   return (state.currentWave / state.waveCount) * 100;
+}nt) * 100;
 }
