@@ -13,3 +13,15 @@ export default defineConfig({
     },
   },
 });
+import path from 'path';
+
+export default defineConfig({
+  plugins: [svelte()],
+  resolve: {
+    alias: {
+      '$shared': path.resolve('../shared'),
+    },
+  },
+  // ...
+});
+import { DIFFICULTY_CONFIG } from '$shared/types';
