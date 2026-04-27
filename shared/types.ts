@@ -47,14 +47,21 @@ export interface Enemy {
 }
 
 export interface GameState {
+  id: string;
+  mode: GameMode;
+  difficulty: Difficulty;
+  waveCount: number | null;
   currentWave: number;
   maxWaves: number;
   isWaveActive: boolean;
+  isPaused: boolean;
+  isGameOver: boolean;
+  playerHealth: number;
+  playerGold: number;
   players: Player[];
   towers: Tower[];
   enemies: Enemy[];
-  difficulty: Difficulty;
-  gameMode: GameMode;
-  isPaused: boolean;
+  projectiles: Projectile[];
   gameTime: number;
+  timestamp: number;
 }
