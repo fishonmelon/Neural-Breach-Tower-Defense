@@ -8,12 +8,20 @@ export interface GameConfig {
   maxPlayers: number;
 }
 
+export const DIFFICULTY_CONFIG: Record<Difficulty, { waves: number | null; multiplier: number }> = {
+  bronze:      { waves: 35,   multiplier: 1.0 },
+  cobalt:      { waves: 45,   multiplier: 1.2 },
+  obsidian:    { waves: 50,   multiplier: 1.5 },
+  singularity: { waves: 175,  multiplier: 2.0 },
+  sandbox:     { waves: null, multiplier: 1.0 }, // null = endless
+};
+
 export const WAVE_COUNTS: Record<Difficulty, number | null> = {
-  bronze: 35,
-  cobalt: 45,
-  obsidian: 50,
+  bronze:      35,
+  cobalt:      45,
+  obsidian:    50,
   singularity: 175,
-  sandbox: null, // endless
+  sandbox:     null, // endless
 };
 
 export interface Player {
@@ -62,9 +70,9 @@ export interface GameState {
   id: string;
   mode: GameMode;
   difficulty: Difficulty;
+  /** Total waves for this difficulty. null = endless (sandbox). */
   waveCount: number | null;
   currentWave: number;
-  maxWaves: number;
   isWaveActive: boolean;
   isPaused: boolean;
   isGameOver: boolean;
