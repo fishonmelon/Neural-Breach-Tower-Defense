@@ -1,29 +1,24 @@
-export class GameLoop {
-  private animationFrameId: number | null = null;
-  private lastFrameTime = 0;
-  private deltaTime = 0;
-  private targetFPS = 60;
-  private frameTime = 1000 / this.targetFPS;
+import type { GameState } from '$shared/types';
 
-  constructor(private onTick: (deltaTime: number) => void) {}
+export class ClientGameLoop {
+  private animationFrameId: number | null = null;
+  private latestState: GameState | null = null;
+
+  constructor(private onRender: (state: GameState) => void) {}
+
+  /** Called by the socket 'game_state_update' listener */
+  updateState(state: GameState): void {
+    this.latestState = state;
+  }
 
   start(): void {
-    const tick = (currentTime: number) => {
-      if (this.lastFrameTime === 0) {
-        this.lastFrameTime = currentTime;
+    const frame = () => {
+      if (this.latestState) {
+        this.onRender(this.latestState);
       }
-
-      this.deltaTime = currentTime - this.lastFrameTime;
-
-      if (this.deltaTime >= this.frameTime) {
-        this.onTick(this.deltaTime / 1000); // Convert to seconds
-        this.lastFrameTime = currentTime;
-      }
-
-      this.animationFrameId = requestAnimationFrame(tick);
+      this.animationFrameId = requestAnimationFrame(frame);
     };
-
-    this.animationFrameId = requestAnimationFrame(tick);
+    this.animationFrameId = requestAnimationFrame(frame);
   }
 
   stop(): void {
@@ -32,8 +27,5 @@ export class GameLoop {
       this.animationFrameId = null;
     }
   }
-
-  getDeltaTime(): number {
-    return this.deltaTime / 1000;
-  }
+}
 }
