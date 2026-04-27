@@ -1,4 +1,4 @@
-import { DIFFICULTY_CONFIG } from '../../../shared/types';
+import { DIFFICULTY_CONFIG } from '$shared/types';
 
 export const GAME_CANVAS_WIDTH = 800;
 export const GAME_CANVAS_HEIGHT = 600;
