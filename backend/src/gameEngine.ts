@@ -1,4 +1,4 @@
-import { GameState, Enemy, Tower, Player, DIFFICULTY_CONFIG } from '../../shared/types';
+import { GameState, Enemy, Tower, DIFFICULTY_CONFIG } from '../../shared/types';
 
 export class GameEngine {
   private gameState: GameState;
@@ -8,10 +8,12 @@ export class GameEngine {
   }
 
   startWave(): void {
-    if (this.gameState.currentWave < this.gameState.maxWaves) {
+    const maxWaves = this.gameState.waveCount;
+    // waveCount is null for sandbox (endless) — always allow starting
+    if (maxWaves === null || this.gameState.currentWave < maxWaves) {
       this.gameState.isWaveActive = true;
       this.gameState.currentWave += 1;
-      console.log(`Wave ${this.gameState.currentWave}/${this.gameState.maxWaves} started!`);
+      console.log(`Wave ${this.gameState.currentWave}/${maxWaves ?? '∞'} started!`);
     } else {
       this.endGame();
     }
@@ -19,7 +21,8 @@ export class GameEngine {
 
   endWave(): void {
     this.gameState.isWaveActive = false;
-    if (this.gameState.currentWave >= this.gameState.maxWaves) {
+    const maxWaves = this.gameState.waveCount;
+    if (maxWaves !== null && this.gameState.currentWave >= maxWaves) {
       this.endGame();
     }
   }
@@ -27,6 +30,7 @@ export class GameEngine {
   endGame(): void {
     console.log('Game Over! All waves completed!');
     this.gameState.isWaveActive = false;
+    this.gameState.isGameOver = true;
   }
 
   update(deltaTime: number): void {
@@ -65,6 +69,10 @@ export class GameEngine {
     }
   }
 
+  getGameState(): GameState {
+    return this.gameState;
+  }
+}
   getGameState(): GameState {
     return this.gameState;
   }
