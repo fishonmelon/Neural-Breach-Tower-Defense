@@ -1,9 +1,5 @@
 {
-  "public": true,
+  "private": true,
   "name": "Neural-Breach-Tower-Defense",
-  "workspaces": {
-    "frontend": "./frontend",
-    "backend": "./backend",
-    "shared": "./shared"
-  }
+  "workspaces": ["./frontend", "./backend", "./shared"]
 }
