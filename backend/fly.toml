@@ -2,8 +2,8 @@ app = "neural-breach-td"
 primary_region = "iad"  # Washington DC — change to closest to you
 
 [build]
-  dockerfile = "Dockerfile"
-
+  dockerfile = "Dockerfile"  # now at project root
+  
 [env]
   PORT = "3000"
   NODE_ENV = "production"
