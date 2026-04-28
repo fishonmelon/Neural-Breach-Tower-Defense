@@ -20,7 +20,7 @@ export function createGameState(
     isPaused: false,
     isGameOver: false,
     playerHealth: INITIAL_HEALTH,
-    playerGold: INITIAL_GOLD,
+    playerBits: INITIAL_GOLD,
     players,
     towers: [],
     enemies: [],
@@ -37,7 +37,7 @@ export function createPlayer(id: string, username: string): Player {
   return {
     id,
     username,
-    gold: INITIAL_GOLD,
+    bits: INITIAL_BITS,
     health: INITIAL_HEALTH,
     lives: 3,
     score: 0,
