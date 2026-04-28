@@ -2,16 +2,21 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy shared package first
-COPY ../shared ./shared
+# Copy shared
+COPY shared/ ./shared/
 
 # Copy backend
-COPY package.json tsconfig.json ./
-RUN npm install
+COPY backend/package.json ./backend/
+COPY backend/tsconfig.json ./backend/
+COPY backend/src/ ./backend/src/
 
-COPY src/ ./src/
+# Copy root workspace config
+COPY package.json ./
+
+# Install & build
+RUN npm install
+WORKDIR /app/backend
 RUN npm run build
 
 EXPOSE 3000
-
 CMD ["node", "dist/index.js"]
