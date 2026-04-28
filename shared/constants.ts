@@ -8,11 +8,11 @@ export const FRAME_TIME = 1000 / FPS; // ~16.67ms per frame
 // Game Balance
 export const INITIAL_BITS = 500;
 export const INITIAL_HEALTH = 100;
-export const GOLD_PER_KILL = 50;
+export const BITS_PER_KILL = 50;
 
 // Tower Constants
 export const TOWER_RADIUS_MULTIPLIER = 1.5; // Visual radius = range * this
-export const MAX_TOWER_LEVEL = 5;
+export const MAX_TOWER_LEVEL = 7;
 
 // Enemy Constants
 export const BASE_ENEMY_SPEED = 100; // pixels per second
