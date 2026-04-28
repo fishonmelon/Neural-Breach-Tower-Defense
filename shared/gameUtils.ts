@@ -1,5 +1,5 @@
 import { GameState, Difficulty, GameMode, WAVE_COUNTS, Player, Enemy, Tower, Projectile } from './types';
-import { INITIAL_GOLD, INITIAL_HEALTH, DIFFICULTY_MODIFIERS } from './constants';
+import { INITIAL_BITS, INITIAL_HEALTH, DIFFICULTY_MODIFIERS } from './constants';
 
 /**
  * Initialize a new game state
