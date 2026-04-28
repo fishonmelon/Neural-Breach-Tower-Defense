@@ -10,9 +10,9 @@ export interface GameConfig {
 
 export const DIFFICULTY_CONFIG: Record<Difficulty, { waves: number | null; multiplier: number }> = {
   bronze:      { waves: 35,   multiplier: 1.0 },
-  cobalt:      { waves: 45,   multiplier: 1.2 },
-  obsidian:    { waves: 50,   multiplier: 1.5 },
-  singularity: { waves: 175,  multiplier: 2.0 },
+  cobalt:      { waves: 45,   multiplier: 1.0 },
+  obsidian:    { waves: 50,   multiplier: 1.0 },
+  singularity: { waves: 175,  multiplier: 1.0 },
   sandbox:     { waves: null, multiplier: 1.0 }, // null = endless
 };
 
@@ -28,7 +28,7 @@ export interface Player {
   id: string;
   username: string;
   health: number;
-  gold: number;
+  bits: number;
   lives: number;
   score: number;
   isAlive: boolean;
@@ -77,7 +77,7 @@ export interface GameState {
   isPaused: boolean;
   isGameOver: boolean;
   playerHealth: number;
-  playerGold: number;
+  playerBits: number;
   players: Player[];
   towers: Tower[];
   enemies: Enemy[];
