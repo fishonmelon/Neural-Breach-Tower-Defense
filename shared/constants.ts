@@ -6,7 +6,7 @@ export const FPS = 60;
 export const FRAME_TIME = 1000 / FPS; // ~16.67ms per frame
 
 // Game Balance
-export const INITIAL_GOLD = 500;
+export const INITIAL_BITS = 500;
 export const INITIAL_HEALTH = 100;
 export const GOLD_PER_KILL = 50;
 
